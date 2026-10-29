@@ -37,6 +37,8 @@ export interface Verdict {
   juryTally: { guilty: number; notGuilty: number };
   verdict: VerdictOutcome;
   articlesViolated: ViolatedArticle[];
+  /** Supported mitigating factors and their effect on the decision. */
+  mitigatingFactors: string[];
   /** One per witness, in the order they testified. Empty when there were none. */
   witnessAssessments: WitnessAssessment[];
   punishment: string;
@@ -76,6 +78,8 @@ export function isVerdict(value: unknown): value is Verdict {
       const article = asRecord(a);
       return !!article && isCount(article.number) && isText(article.title) && isText(article.explanation);
     }) &&
+    Array.isArray(v.mitigatingFactors) &&
+    v.mitigatingFactors.every(isText) &&
     Array.isArray(v.witnessAssessments) &&
     v.witnessAssessments.every((w) => {
       const assessment = asRecord(w);
@@ -175,6 +179,10 @@ export function normalizeVerdict(raw: unknown, submission: CaseSubmission): Norm
   if (!outcome) return invalid(`verdict is not GUILTY or NOT GUILTY (got ${JSON.stringify(r.verdict)})`);
   const witnessAssessments = parseWitnessAssessments(r.witnessAssessments, submission.witnesses);
   if (!witnessAssessments) return invalid("witnessAssessments is missing a usable entry for some witness");
+  if (!Array.isArray(r.mitigatingFactors) || !r.mitigatingFactors.every(isText)) {
+    return invalid("mitigatingFactors must be an array of non-empty strings");
+  }
+  const mitigatingFactors = r.mitigatingFactors.map((factor) => factor.trim());
   if (!isText(r.punishment)) return invalid("punishment is missing");
   if (!isText(r.closingRemark)) return invalid("closingRemark is missing");
 
@@ -212,8 +220,9 @@ export function normalizeVerdict(raw: unknown, submission: CaseSubmission): Norm
       juryTally: tally,
       verdict: outcome,
       articlesViolated: [...articles.values()],
+      mitigatingFactors,
       witnessAssessments,
-      punishment: r.punishment.trim(),
+      punishment: guilty ? r.punishment.trim() : "No punishment. The defendant is free.",
       punishmentArticles,
       punishmentAdjustment: adjustment,
       juryOverruled: { overruled, reason: overruled ? (overruledReason as string).trim() : "" },

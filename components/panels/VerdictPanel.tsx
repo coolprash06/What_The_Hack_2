@@ -3,6 +3,7 @@ import type { CaseSubmission } from "@/lib/case";
 import { CONSTITUTION } from "@/lib/constitution";
 import { COURT_NAME } from "@/lib/court";
 import { MAX_CREDIBILITY, type Verdict } from "@/lib/verdict";
+import { downloadVerdictPdf } from "@/lib/verdictPdf";
 import { Button, Card, PanelHeading } from "../ui";
 import { sideLabel } from "./WitnessesPanel";
 
@@ -96,6 +97,14 @@ export function VerdictPanel({
           )}
         </Section>
 
+        {verdict.mitigatingFactors.length > 0 && (
+          <Section title="Mitigating factors">
+            <ul className="list-disc space-y-2 pl-5">
+              {verdict.mitigatingFactors.map((factor, i) => <li key={i}>{factor}</li>)}
+            </ul>
+          </Section>
+        )}
+
         {verdict.witnessAssessments.length > 0 && (
           <Section title="Witness credibility">
             <ul className="space-y-3">
@@ -134,7 +143,7 @@ export function VerdictPanel({
         )}
 
         <Section title="Sentence">
-          {verdict.punishmentArticles.length > 0 && (
+          {guilty && verdict.punishmentArticles.length > 0 && (
             <ul className="mb-2 flex flex-wrap gap-1.5" aria-label="Punishment under">
               {verdict.punishmentArticles.map((n) => (
                 <li
@@ -146,8 +155,8 @@ export function VerdictPanel({
               ))}
             </ul>
           )}
-          <p className="font-medium text-amber-50">{verdict.punishment}</p>
-          {verdict.punishmentAdjustment.type !== "none" && (
+          <p className="font-medium text-amber-50">{guilty ? verdict.punishment : "No punishment. The defendant is free."}</p>
+          {guilty && verdict.punishmentAdjustment.type !== "none" && (
             <p className="mt-2 text-stone-300">
               <span
                 className={`mr-1.5 rounded px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
@@ -168,7 +177,10 @@ export function VerdictPanel({
         </Section>
       </div>
 
-      <div className="mt-6 flex justify-center">
+      <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <Button variant="ghost" onClick={() => downloadVerdictPdf(submission, verdict)}>
+          Download verdict (PDF)
+        </Button>
         <Button onClick={onNewCase}>Start new case</Button>
       </div>
     </Card>

@@ -669,7 +669,7 @@ export function CourtApp() {
       )}
 
       {panel && (
-        <section className="absolute inset-x-0 bottom-0 z-10 flex max-h-[58dvh] flex-col overflow-y-auto px-4 pt-2 pb-24 sm:px-6 lg:inset-y-0 lg:right-0 lg:left-auto lg:max-h-none lg:w-[560px] lg:pt-32 lg:pr-8 lg:pb-24 lg:pl-0">
+        <section className="absolute inset-x-0 bottom-0 z-10 flex max-h-[58dvh] flex-col overflow-y-auto px-4 pt-2 pb-24 sm:px-6 lg:top-32 lg:right-0 lg:bottom-0 lg:left-auto lg:max-h-none lg:w-[560px] lg:pt-0 lg:pr-8 lg:pb-24 lg:pl-0">
           <div key={panelKey} {...COVERS_LABELS} className={`my-auto w-full ${panel.leaving ? "panel-out" : "panel-in"}`}>
             {panelStep === "file" && (
               <FileCasePanel value={caseFile} onChange={updateCase} onSubmit={() => changeStep("defense")} />

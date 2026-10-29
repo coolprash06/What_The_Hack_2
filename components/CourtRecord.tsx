@@ -13,7 +13,7 @@ const TYPE_LABEL: Record<RecordType, string> = {
   vote: "Jury vote",
 };
 
-const ROLE_LABEL: Record<RecordRole, string> = {
+export const ROLE_LABEL: Record<RecordRole, string> = {
   petitioner: "Petitioner",
   defendant: "Defendant",
   witness: "Witness",
@@ -27,7 +27,7 @@ const ROLE_COLOR: Record<RecordRole, string> = {
   juror: "text-amber-200",
 };
 
-function describe(e: RecordEntry) {
+export function describe(e: RecordEntry) {
   if (e.type === "cross_question") return `${TYPE_LABEL[e.type]} of ${e.addressee}`;
   if (e.type === "final_words") return `${TYPE_LABEL[e.type]} · round ${e.round}`;
   if (e.type === "vote") return `${TYPE_LABEL[e.type]} · ${e.vote === "guilty" ? "Guilty" : "Not Guilty"}`;
