@@ -6,7 +6,7 @@ An AI courtroom for petty friend-group disputes. File a case against your friend
 
 Built for **ACM x MTC What The Hack?! 2.0**, Track 3: **Artificial Super Unintelligence**.
 
-**Live demo:** _coming soon_
+**Live demo:** https://what-the-hack-2.vercel.app/login
 
 ---
 
