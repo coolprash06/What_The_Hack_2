@@ -1,3 +1,5 @@
+import { authenticated } from "@/lib/auth/session";
+import { sameOrigin } from "@/lib/auth/core";
 import { parseCaseSubmission, type CaseSubmission } from "@/lib/case";
 import { COURT_ERRORS } from "@/lib/court";
 import { buildCaseBriefing, buildJudgeSystemPrompt } from "@/lib/judge";
@@ -91,6 +93,8 @@ async function askJudge(submission: CaseSubmission, apiKey: string, model: strin
 }
 
 export async function POST(request: Request) {
+  if (!await authenticated()) return Response.json({ error: "Authentication required" }, { status: 401 });
+  if (!sameOrigin(request)) return Response.json({ error: "Forbidden" }, { status: 403 });
   const submission = parseCaseSubmission(await request.json().catch(() => null));
   if (!submission) {
     console.warn("[verdict] rejected an invalid case submission");
