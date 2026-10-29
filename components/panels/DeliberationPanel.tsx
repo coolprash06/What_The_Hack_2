@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { stepNumber } from "../ProgressBar";
 import { Card, PanelHeading } from "../ui";
 
 const LINES = [
@@ -22,7 +23,7 @@ export function DeliberationPanel() {
 
   return (
     <Card className="text-center">
-      <PanelHeading eyebrow="Step 4 · Deliberation" title="Order in the court!" />
+      <PanelHeading eyebrow={`Step ${stepNumber("deliberation")} · Deliberation`} title="Order in the court!" />
       <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center">
         <svg viewBox="0 0 64 64" className="gavel-swing h-14 w-14" aria-hidden>
           <rect x="30" y="22" width="30" height="5" rx="2" fill="#7a4a2a" />

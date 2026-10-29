@@ -34,12 +34,16 @@ Example cases:
 ## Case Flow
 1. **File the case:** case title, petitioner name, defendant name, petitioner's statement, punishment requested, number of jurors (1–6).
 2. **Defendant's statement:** the defendant's side.
-3. **Witnesses (optional):** skip, or add one or more witnesses. Each has a name, the side they support (Petitioner / Defendant / Neutral), their relationship to the parties, and a statement.
-4. **Jury:** one card per juror with name, vote (Guilty / Not Guilty), and reason.
-5. **Deliberation:** a dramatic loading state while the AI Judge decides.
-6. **Verdict:** a formal verdict card, then "Start new case". If the AI call fails, a "Mistrial" card with an "Appeal to the Judge again" (retry) button.
+3. **Witnesses (optional):** skip, or add one or more witnesses. Each has a name, the side they support (Petitioner / Defendant / Neutral), their relationship to the parties, and a statement. Right after each witness testifies, the opposing side may **cross-examine** (both sides for a neutral witness, petitioner first): "No questions", or question-and-answer pairs until "Done questioning".
+4. **Final words:** the judge asks (scripted lines, no AI) whether anyone wishes to say more, then asks the petitioner, the defendant and each witness in turn: "Nothing to say" or "Add a statement". If anyone added a statement, the judge asks again and the round repeats; once a whole round has nothing to add, the judge hands over to the jury. Every statement is kept with its speaker and round.
+5. **Jury:** one card per juror with name, vote (Guilty / Not Guilty), and reason.
+6. **Deliberation:** a dramatic loading state while the AI Judge decides.
+7. **Verdict:** a formal verdict card, then "Start new case". If the AI call fails, a "Mistrial" card with an "Appeal to the Judge again" (retry) button.
 
 The camera focuses on the active part of the court in each step.
+
+### Court record
+One ordered transcript of everything said (statements, testimony, cross-examination, final words with round, jury votes and reasons), each entry with speaker, role and type. It is sent in full to `/api/verdict`, and a "Court record" button under the title opens it during the case.
 
 ### Navigation
 - A small fixed **Back / Next** control in the bottom-right corner moves through the flow.
@@ -48,7 +52,7 @@ The camera focuses on the active part of the court in each step.
 - A step progress bar at the top.
 
 ## AI Judge
-- Reads all statements, witness testimony, and jury votes and reasons.
+- Reads all statements, witness testimony, final words, and jury votes and reasons.
 - Applies the **Friendship Constitution**, cites articles by number, and can creatively apply them to new situations.
 - Treats witnesses with suspicion: considers their side, their relationship to the parties, and possible bias or lying.
 - Tone: dramatic and theatrical, treating petty disputes like the trial of the century. Funny, never hateful or crude.
@@ -59,7 +63,7 @@ The camera focuses on the active part of the court in each step.
 - `juryTally` (recomputed on the server from the real votes)
 - `verdict`
 - `articlesViolated` (only article numbers that exist in the constitution)
-- `witnessAssessments`: credibility rating out of 10 plus a judge comment, per witness (omitted if there are no witnesses)
+- `witnessAssessments`: credibility rating out of 10 plus a judge comment, per witness (an empty array if there are no witnesses; the verdict card hides the section)
 - `punishment`
 - `closingRemark`
 
@@ -95,7 +99,7 @@ A supreme-court style look: a long raised bench with a row of high-back chairs (
 ## Tech Stack
 - Next.js (App Router, TypeScript) + Tailwind
 - React Three Fiber + drei (3D), zustand (lamp/court state)
-- Groq API (Llama, default `llama-3.3-70b-versatile`), called only from the server route `app/api/verdict/route.ts`
+- Groq API (default `openai/gpt-oss-120b`; Groq retired `llama-3.3-70b-versatile`), called only from the server route `app/api/verdict/route.ts`
 - Deployed on Vercel
 - `GROQ_API_KEY` and `GROQ_MODEL` in environment variables; `.env.local` is never committed
 - The Groq key will be added later; until then the verdict step shows the Mistrial card
@@ -117,7 +121,7 @@ A supreme-court style look: a long raised bench with a row of high-back chairs (
 
 **Next:**
 1. Witness stand, characters, lamp, opening sequence, Back/Next navigation
-2. Witness form step and witness credibility in the verdict
+2. ~~Witness form step and witness credibility in the verdict~~ (done, plus the final-words step)
 3. Add the Groq key and test real verdicts (by ~4:30 PM)
 4. Friendship Constitution, polish
 5. README, deploy to Vercel, make the repo public, submit by 5:30 PM

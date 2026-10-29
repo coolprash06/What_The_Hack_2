@@ -6,7 +6,7 @@ interface CourtState {
   lampOn: boolean;
   /** True while the chain is mid-animation, so it cannot be re-triggered. */
   pulling: boolean;
-  /** Disabled while the user is dragging the chain so OrbitControls stays put. */
+  /** Disabled while the user is dragging the chain so the camera's look-around stays put. */
   controlsEnabled: boolean;
   motionOn: boolean;
   pullLamp: () => void;

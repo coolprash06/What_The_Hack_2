@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 import { LIMITS, type CaseFile } from "@/lib/case";
 import { STEP_FORM_ID } from "../StepNav";
+import { stepNumber } from "../ProgressBar";
 import { Card, Field, PanelHeading, inputClass } from "../ui";
 
 export function DefensePanel({
@@ -21,7 +22,7 @@ export function DefensePanel({
 
   return (
     <Card>
-      <PanelHeading eyebrow="Step 2 · The Defendant" title={`${caseFile.defendant}, rise.`}>
+      <PanelHeading eyebrow={`Step ${stepNumber("defense")} · The Defendant`} title={`${caseFile.defendant}, rise.`}>
         You stand accused in the matter of <span className="text-amber-200">“{caseFile.title}”</span>. How do you
         answer these charges?
       </PanelHeading>

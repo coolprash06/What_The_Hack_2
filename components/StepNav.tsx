@@ -1,3 +1,4 @@
+import { COVERS_LABELS } from "./Pinned";
 import { Button } from "./ui";
 
 // Each step's panel renders its <form> with this id; Next submits it from outside.
@@ -16,6 +17,7 @@ export function StepNav({
 }) {
   return (
     <nav
+      {...COVERS_LABELS}
       aria-label="Step navigation"
       className="pointer-events-auto fixed right-4 bottom-4 z-20 flex gap-2 rounded-xl border border-amber-200/15 bg-stone-950/95 p-1.5 shadow-xl shadow-black/60 sm:right-6 sm:bottom-6"
     >

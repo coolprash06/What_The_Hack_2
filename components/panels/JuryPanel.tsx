@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 import { LIMITS, type Vote } from "@/lib/case";
 import { STEP_FORM_ID } from "../StepNav";
+import { stepNumber } from "../ProgressBar";
 import { Card, Field, PanelHeading, inputClass } from "../ui";
 
 export interface JurorDraft {
@@ -34,7 +35,7 @@ export function JuryPanel({
 
   return (
     <Card>
-      <PanelHeading eyebrow={`Step 3 · Juror ${index + 1} of ${jurors.length}`} title="The Jury Speaks">
+      <PanelHeading eyebrow={`Step ${stepNumber("jury")} · Juror ${index + 1} of ${jurors.length}`} title="The Jury Speaks">
         Each juror must cast their vote under the solemn gaze of the court.
       </PanelHeading>
 

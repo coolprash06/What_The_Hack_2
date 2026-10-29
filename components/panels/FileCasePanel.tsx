@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 import { LIMITS, MAX_JURORS, MIN_JURORS, type CaseFile } from "@/lib/case";
 import { STEP_FORM_ID } from "../StepNav";
+import { stepNumber } from "../ProgressBar";
 import { Card, Field, PanelHeading, inputClass } from "../ui";
 
 const JUROR_OPTIONS = Array.from({ length: MAX_JURORS - MIN_JURORS + 1 }, (_, i) => MIN_JURORS + i);
@@ -21,7 +22,7 @@ export function FileCasePanel({
 
   return (
     <Card>
-      <PanelHeading eyebrow="Step 1 · The Petitioner" title="File the Case">
+      <PanelHeading eyebrow={`Step ${stepNumber("file")} · The Petitioner`} title="File the Case">
         State your grievance before the court. Spare no detail; the court sees all.
       </PanelHeading>
       <form id={STEP_FORM_ID} onSubmit={handleSubmit} className="space-y-4">

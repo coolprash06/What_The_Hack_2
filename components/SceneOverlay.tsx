@@ -7,7 +7,7 @@ import type { Speaker } from "./scene/Courtroom";
 
 function NameTag({ id, title, subtitle, active, show }: { id: string; title: string; subtitle?: string; active: boolean; show: boolean }) {
   return (
-    <Pinned id={id} className="-translate-x-1/2 -translate-y-full">
+    <Pinned id={id} avoidUi className="-translate-x-1/2 -translate-y-full">
       <div
         className={`whitespace-nowrap rounded-full border px-2.5 py-0.5 text-center text-[11px] font-semibold leading-tight shadow-lg shadow-black/60 transition-[opacity,background-color,color] duration-500 ${
           show ? "opacity-100" : "opacity-0"
@@ -48,15 +48,22 @@ function SpeechBubble({ text, onDone }: { text: string; onDone?: () => void }) {
 /** Everything drawn over the 3D scene and pinned to it: name tags, hints, the judge's speech. */
 export function SceneOverlay({
   names,
+  witnessSubtitle,
+  witnessPresent,
   jurorCount,
   speaker,
   judgeSpeech,
   onJudgeSpeechDone,
 }: {
-  names: { petitioner: string; defendant: string; jurors: string[] };
+  names: { petitioner: string; defendant: string; witness: string; jurors: string[] };
+  /** Shown under the witness's name, e.g. which side they support. */
+  witnessSubtitle?: string;
+  /** False once the case has gone ahead without witnesses. */
+  witnessPresent: boolean;
   jurorCount: number;
   speaker: Speaker | null;
-  judgeSpeech: string | null;
+  /** The key restarts the typing whenever the judge says a new line. */
+  judgeSpeech: { key: string; text: string } | null;
   onJudgeSpeechDone?: () => void;
 }) {
   const lampOn = useCourt((s) => s.lampOn);
@@ -80,7 +87,13 @@ export function SceneOverlay({
         active={speaker === "defendant"}
         show={lampOn}
       />
-      <NameTag id="tag-witness" title="Witness" active={speaker === "witness"} show={lampOn} />
+      <NameTag
+        id="tag-witness"
+        title={names.witness || "Witness"}
+        subtitle={names.witness ? witnessSubtitle || "Witness" : undefined}
+        active={speaker === "witness"}
+        show={lampOn && witnessPresent}
+      />
       {Array.from({ length: jurorCount }, (_, i) => (
         <NameTag
           key={i}
@@ -116,7 +129,7 @@ export function SceneOverlay({
 
       {judgeSpeech && (
         <Pinned id="judge-speech" className="-translate-x-full -translate-y-full">
-          <SpeechBubble text={judgeSpeech} onDone={onJudgeSpeechDone} />
+          <SpeechBubble key={judgeSpeech.key} text={judgeSpeech.text} onDone={onJudgeSpeechDone} />
         </Pinned>
       )}
     </div>

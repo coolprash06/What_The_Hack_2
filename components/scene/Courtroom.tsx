@@ -103,9 +103,11 @@ export interface CourtroomProps {
   seats: SeatState[];
   gavelActive: boolean;
   speaker: Speaker | null;
+  /** False once the case has gone ahead without witnesses: the stand stays empty. */
+  witnessPresent: boolean;
 }
 
-export default function Courtroom({ focus, onArrive, seats, gavelActive, speaker }: CourtroomProps) {
+export default function Courtroom({ focus, onArrive, seats, gavelActive, speaker, witnessPresent }: CourtroomProps) {
   const lampOn = useCourt((s) => s.lampOn);
   const spot = (active: boolean) => (active ? SPOT.active : focus === "wide" ? SPOT.wide : SPOT.idle);
 
@@ -128,7 +130,7 @@ export default function Courtroom({ focus, onArrive, seats, gavelActive, speaker
       <AreaSpot position={[-3.6, 8, 2.5]} target={PETITIONER_POSITION} intensity={spot(focus === "petitioner")} />
       <AreaSpot position={[3.6, 8, 2.5]} target={DEFENDANT_POSITION} intensity={spot(focus === "defendant")} />
       <AreaSpot position={[-5, 8.5, 0]} target={JURY_POSITION} intensity={spot(focus === "jury")} angle={0.45} />
-      <AreaSpot position={[5, 8, -1]} target={WITNESS_POSITION} intensity={spot(false)} angle={0.35} castShadow={false} />
+      <AreaSpot position={[5, 8, -1]} target={WITNESS_POSITION} intensity={spot(focus === "witness")} angle={0.35} castShadow={false} />
 
       <Floor />
       <Room />
@@ -159,7 +161,15 @@ export default function Courtroom({ focus, onArrive, seats, gavelActive, speaker
         />
       </Podium>
       <WitnessStand position={WITNESS_POSITION} rotationY={-0.7}>
-        <Figure position={WITNESS_SEAT} seated look={LOOKS.witness} seed={3} active={speaker === "witness"} tagId="tag-witness" />
+        <Figure
+          position={WITNESS_SEAT}
+          visible={witnessPresent}
+          seated
+          look={LOOKS.witness}
+          seed={3}
+          active={speaker === "witness"}
+          tagId="tag-witness"
+        />
       </WitnessStand>
       <JuryBox
         position={JURY_POSITION}

@@ -1,17 +1,24 @@
-export type Step = "file" | "defense" | "jury" | "deliberation" | "verdict";
+import { COVERS_LABELS } from "./Pinned";
+
+export type Step = "file" | "defense" | "witnesses" | "final" | "jury" | "deliberation" | "verdict";
 
 export const STEPS: { id: Step; label: string }[] = [
   { id: "file", label: "File the case" },
   { id: "defense", label: "Defense" },
+  { id: "witnesses", label: "Witnesses" },
+  { id: "final", label: "Final words" },
   { id: "jury", label: "Jury" },
   { id: "deliberation", label: "Deliberation" },
   { id: "verdict", label: "Verdict" },
 ];
 
+/** 1-based position of a step in the flow, for panel headings. */
+export const stepNumber = (step: Step) => STEPS.findIndex((s) => s.id === step) + 1;
+
 export function ProgressBar({ step }: { step: Step }) {
   const current = STEPS.findIndex((s) => s.id === step);
   return (
-    <ol className="flex w-full max-w-2xl items-start gap-1.5 sm:gap-2" aria-label="Trial progress">
+    <ol {...COVERS_LABELS} className="flex w-full max-w-3xl items-start gap-1.5 sm:gap-2" aria-label="Trial progress">
       {STEPS.map((s, i) => {
         const done = i < current;
         const active = i === current;
@@ -23,7 +30,7 @@ export function ProgressBar({ step }: { step: Step }) {
               }`}
             />
             <p
-              className={`mt-1.5 hidden text-[11px] font-medium uppercase tracking-wider sm:block ${
+              className={`mt-1.5 hidden text-[11px] font-medium uppercase leading-tight tracking-wider sm:block ${
                 active ? "text-amber-200" : done ? "text-amber-500/80" : "text-stone-500"
               }`}
             >

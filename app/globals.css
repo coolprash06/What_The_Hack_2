@@ -185,3 +185,8 @@ body {
     opacity: 0;
   }
 }
+
+/* Dragging the 3D scene looks around (CameraRig), so touches must not scroll the page. */
+main canvas {
+  touch-action: none;
+}
