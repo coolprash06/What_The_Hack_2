@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 import { LIMITS, type Vote } from "@/lib/case";
-import { Button, Card, Field, PanelHeading, inputClass } from "../ui";
+import { STEP_FORM_ID } from "../StepNav";
+import { Card, Field, PanelHeading, inputClass } from "../ui";
 
 export interface JurorDraft {
   name: string;
@@ -17,17 +18,14 @@ export function JuryPanel({
   jurors,
   index,
   onChange,
-  onBack,
   onNext,
 }: {
   jurors: JurorDraft[];
   index: number;
   onChange: (patch: Partial<JurorDraft>) => void;
-  onBack: () => void;
   onNext: () => void;
 }) {
   const juror = jurors[index];
-  const isLast = index === jurors.length - 1;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -58,7 +56,7 @@ export function JuryPanel({
       </div>
 
       {/* Keyed by index so each juror gets a fresh form (and fresh validation). */}
-      <form key={index} onSubmit={handleSubmit} className="space-y-4">
+      <form key={index} id={STEP_FORM_ID} onSubmit={handleSubmit} className="space-y-4">
         <Field label="Juror name" htmlFor="jurorName">
           <input
             id="jurorName"
@@ -104,14 +102,7 @@ export function JuryPanel({
             onChange={(e) => onChange({ reason: e.target.value })}
           />
         </Field>
-        <div className="flex items-center justify-between gap-3 pt-2">
-          <Button variant="ghost" onClick={onBack}>
-            ← Back
-          </Button>
-          <Button type="submit" disabled={!juror.vote} title={juror.vote ? undefined : "Cast a vote first"}>
-            {isLast ? "Send the jury out ⚖" : "Next juror →"}
-          </Button>
-        </div>
+        {!juror.vote && <p className="text-xs text-stone-400">Cast a vote to continue.</p>}
       </form>
     </Card>
   );

@@ -1,18 +1,17 @@
 import type { FormEvent } from "react";
 import { LIMITS, type CaseFile } from "@/lib/case";
-import { Button, Card, Field, PanelHeading, inputClass } from "../ui";
+import { STEP_FORM_ID } from "../StepNav";
+import { Card, Field, PanelHeading, inputClass } from "../ui";
 
 export function DefensePanel({
   caseFile,
   value,
   onChange,
-  onBack,
   onSubmit,
 }: {
   caseFile: CaseFile;
   value: string;
   onChange: (value: string) => void;
-  onBack: () => void;
   onSubmit: () => void;
 }) {
   const handleSubmit = (e: FormEvent) => {
@@ -32,7 +31,7 @@ export function DefensePanel({
         </p>
         {caseFile.petitionerStatement}
       </blockquote>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id={STEP_FORM_ID} onSubmit={handleSubmit} className="space-y-4">
         <Field label="Defendant's statement" htmlFor="defendantStatement">
           <textarea
             id="defendantStatement"
@@ -45,12 +44,6 @@ export function DefensePanel({
             onChange={(e) => onChange(e.target.value)}
           />
         </Field>
-        <div className="flex justify-between gap-3 pt-2">
-          <Button variant="ghost" onClick={onBack}>
-            ← Back
-          </Button>
-          <Button type="submit">The defense rests →</Button>
-        </div>
       </form>
     </Card>
   );

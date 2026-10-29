@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <div
-      className={`pointer-events-auto rounded-2xl border border-amber-200/15 bg-stone-950/85 p-6 text-stone-100 shadow-2xl shadow-black/60 ring-1 ring-black/40 backdrop-blur-md sm:p-7 ${className}`}
+      className={`pointer-events-auto rounded-2xl border border-amber-200/15 bg-stone-950/96 p-6 text-stone-100 shadow-2xl shadow-black/60 ring-1 ring-black/40 sm:p-7 ${className}`}
     >
       {children}
     </div>
@@ -48,7 +48,8 @@ export const inputClass =
 const BUTTON_VARIANTS = {
   primary:
     "bg-amber-500 text-stone-950 hover:bg-amber-400 shadow-lg shadow-amber-900/40 disabled:bg-stone-700 disabled:text-stone-400 disabled:shadow-none",
-  ghost: "border border-stone-600 text-stone-200 hover:border-amber-300/60 hover:text-amber-100",
+  ghost:
+    "border border-stone-600 text-stone-200 hover:border-amber-300/60 hover:text-amber-100 disabled:opacity-40 disabled:hover:border-stone-600 disabled:hover:text-stone-200",
 } as const;
 
 export function Button({

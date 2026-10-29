@@ -1,6 +1,7 @@
 import type { FormEvent } from "react";
 import { LIMITS, MAX_JURORS, MIN_JURORS, type CaseFile } from "@/lib/case";
-import { Button, Card, Field, PanelHeading, inputClass } from "../ui";
+import { STEP_FORM_ID } from "../StepNav";
+import { Card, Field, PanelHeading, inputClass } from "../ui";
 
 const JUROR_OPTIONS = Array.from({ length: MAX_JURORS - MIN_JURORS + 1 }, (_, i) => MIN_JURORS + i);
 
@@ -23,7 +24,7 @@ export function FileCasePanel({
       <PanelHeading eyebrow="Step 1 · The Petitioner" title="File the Case">
         State your grievance before the court. Spare no detail; the court sees all.
       </PanelHeading>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id={STEP_FORM_ID} onSubmit={handleSubmit} className="space-y-4">
         <Field label="Case title" htmlFor="title">
           <input
             id="title"
@@ -105,9 +106,6 @@ export function FileCasePanel({
             })}
           </div>
         </Field>
-        <div className="flex justify-end pt-2">
-          <Button type="submit">Submit to the court →</Button>
-        </div>
       </form>
     </Card>
   );

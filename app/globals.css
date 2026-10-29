@@ -80,11 +80,108 @@ body {
   animation: deliberation-bar 1.6s ease-in-out infinite;
 }
 
+/* Step panels: slide in once the camera has (mostly) arrived, fade out before it leaves. */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes panel-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+.panel-in {
+  animation: panel-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+/* Duration matches PANEL_FADE_MS in CourtApp. */
+.panel-out {
+  animation: panel-out 0.28s ease-in both;
+  pointer-events: none;
+}
+
+@keyframes look-hint {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  10%,
+  85% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Duration matches LOOK_HINT_MS in CourtApp. */
+.look-hint {
+  animation: look-hint 6s ease-in-out both;
+}
+
+/* --- The down-arrow cue anchored to the lamp's pull-chain bead --- */
+.pull-cue {
+  color: #d8b968;
+  opacity: 0.75;
+  animation: pull-bob 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(216, 185, 104, 0.45));
+}
+
+@keyframes pull-bob {
+  0%,
+  100% {
+    transform: translateY(-2px);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateY(4px);
+    opacity: 0.95;
+  }
+}
+
+.lamp-hint {
+  text-shadow: 0 0 12px rgba(216, 185, 104, 0.55);
+  animation: lamp-hint-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes lamp-hint-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gavel-swing,
   .deliberation-bar,
   .stamp-in,
-  .fade-in {
+  .fade-in,
+  .pull-cue,
+  .lamp-hint,
+  .panel-in,
+  .look-hint {
     animation: none;
+  }
+
+  .panel-out {
+    animation: none;
+    opacity: 0;
   }
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, type ReactNode } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { roomLight } from "./LightRig";
 import { Box, COLORS, Cylinder } from "./primitives";
 
 type Vec3 = [number, number, number];
@@ -39,7 +40,8 @@ function buildPlanks() {
 
 const PLANKS = buildPlanks();
 
-export function Floor() {
+// Static scenery is memoized so form typing (which re-renders the scene) skips it.
+export const Floor = memo(function Floor() {
   const ref = useRef<THREE.InstancedMesh>(null);
 
   useLayoutEffect(() => {
@@ -70,22 +72,24 @@ export function Floor() {
       </instancedMesh>
     </group>
   );
-}
+});
 
 function Sconce({ x }: { x: number }) {
+  const shade = useRef<THREE.MeshStandardMaterial>(null);
+  const light = useRef<THREE.PointLight>(null);
+  // Sconces stay dark until the lamp brings the room up.
+  useFrame(() => {
+    if (shade.current) shade.current.emissiveIntensity = roomLight.level * 2.5;
+    if (light.current) light.current.intensity = roomLight.level * 6;
+  });
   return (
     <group position={[x, 4.4, -10.85]}>
       <Box size={[0.18, 0.5, 0.2]} color={COLORS.brass} metalness={0.8} roughness={0.35} />
-      <Cylinder
-        radius={0.16}
-        radiusBottom={0.22}
-        height={0.34}
-        position={[0, 0.38, 0.12]}
-        color="#ffcf8a"
-        emissive="#ffae5c"
-        emissiveIntensity={2.5}
-      />
-      <pointLight position={[0, 0.4, 0.5]} color="#ffae5c" intensity={2.5} distance={8} decay={1.2} />
+      <mesh position={[0, 0.38, 0.12]} castShadow>
+        <cylinderGeometry args={[0.16, 0.22, 0.34, 24]} />
+        <meshStandardMaterial ref={shade} color="#ffcf8a" emissive="#ffae5c" emissiveIntensity={0} roughness={0.6} />
+      </mesh>
+      <pointLight ref={light} position={[0, 0.4, 0.5]} color="#ffae5c" intensity={0} distance={10} decay={1.3} />
     </group>
   );
 }
@@ -111,7 +115,7 @@ function Seal() {
   );
 }
 
-export function Room() {
+export const Room = memo(function Room() {
   return (
     <group>
       {/* Back wall with wainscoting */}
@@ -148,7 +152,7 @@ export function Room() {
       <GalleryRail />
     </group>
   );
-}
+});
 
 // The "bar" separating the gallery from the court floor, open in the middle.
 function GalleryRail() {
@@ -216,7 +220,7 @@ function Gavel({ active, position }: { active: boolean; position: Vec3 }) {
 
 const DESK_TOP_Y = 3.11;
 
-export function JudgeBench({ gavelActive }: { gavelActive: boolean }) {
+export const JudgeBench = memo(function JudgeBench({ gavelActive }: { gavelActive: boolean }) {
   return (
     <group>
       {/* Raised platform and step */}
@@ -242,7 +246,7 @@ export function JudgeBench({ gavelActive }: { gavelActive: boolean }) {
       <Gavel active={gavelActive} position={[0.5, DESK_TOP_Y + 0.18, -6.0]} />
     </group>
   );
-}
+});
 
 // A soft glowing disc on the floor that fades in under the active area.
 function FocusRing({ active, radius, position }: { active: boolean; radius: number; position: Vec3 }) {
@@ -265,11 +269,14 @@ export function Podium({
   rotationY,
   accent,
   active,
+  children,
 }: {
   position: Vec3;
   rotationY: number;
   accent: string;
   active: boolean;
+  /** Whoever stands at the podium, in podium-local space. */
+  children?: ReactNode;
 }) {
   return (
     <group position={position} rotation-y={rotationY}>
@@ -282,6 +289,35 @@ export function Podium({
       {/* Microphone */}
       <Cylinder radius={0.015} height={0.5} position={[0.35, 1.6, -0.25]} rotation-x={-0.4} color="#222" metalness={0.6} segments={8} />
       <Cylinder radius={0.045} height={0.12} position={[0.35, 1.84, -0.36]} rotation-x={-0.4} color="#111" metalness={0.4} segments={12} />
+      {children}
+    </group>
+  );
+}
+
+// A small raised box with a chair, beside the bench. Origin on the floor; the
+// open front faces +z. Occupants are placed at WITNESS_SEAT.
+export const WITNESS_SEAT: Vec3 = [0, 1.07, -0.2];
+
+export function WitnessStand({ position, rotationY, children }: { position: Vec3; rotationY: number; children?: ReactNode }) {
+  return (
+    <group position={position} rotation-y={rotationY}>
+      <Box size={[1.9, 0.5, 1.9]} position={[0, 0.25, 0]} color={COLORS.woodDark} />
+      <Box size={[1.4, 0.25, 0.5]} position={[0, 0.125, 1.2]} color={COLORS.woodDark} />
+      {/* Enclosure */}
+      <Box size={[1.9, 0.8, 0.1]} position={[0, 0.9, 0.9]} color={COLORS.woodMid} />
+      <Box size={[1.6, 0.5, 0.04]} position={[0, 0.88, 0.96]} color={COLORS.woodRich} />
+      <Box size={[2.0, 0.07, 0.2]} position={[0, 1.33, 0.9]} color={COLORS.woodRich} roughness={0.4} />
+      {[-0.9, 0.9].map((x) => (
+        <group key={x}>
+          <Box size={[0.1, 0.8, 1.9]} position={[x, 0.9, 0]} color={COLORS.woodMid} />
+          <Box size={[0.2, 0.07, 2.0]} position={[x, 1.33, 0]} color={COLORS.woodRich} roughness={0.4} />
+        </group>
+      ))}
+      {/* Chair */}
+      <Box size={[0.7, 0.45, 0.6]} position={[0, 0.725, -0.25]} color={COLORS.woodDark} />
+      <Box size={[0.75, 0.12, 0.65]} position={[0, 1.01, -0.25]} color={COLORS.leather} roughness={0.5} />
+      <Box size={[0.75, 1.1, 0.1]} position={[0, 1.5, -0.58]} color={COLORS.leather} roughness={0.5} />
+      {children}
     </group>
   );
 }
@@ -295,7 +331,17 @@ const SEAT_GLOW: Record<SeatState, { color: string; intensity: number }> = {
   not_guilty: { color: "#3fbf6a", intensity: 0.6 },
 };
 
-function JurorSeat({ position, state }: { position: Vec3; state: SeatState }) {
+function JurorSeat({
+  position,
+  state,
+  visible,
+  children,
+}: {
+  position: Vec3;
+  state: SeatState;
+  visible: boolean;
+  children?: ReactNode;
+}) {
   const cushion = useRef<THREE.MeshStandardMaterial>(null);
   const back = useRef<THREE.MeshStandardMaterial>(null);
   const targetColor = useMemo(() => new THREE.Color(), []);
@@ -312,7 +358,7 @@ function JurorSeat({ position, state }: { position: Vec3; state: SeatState }) {
   });
 
   return (
-    <group position={position}>
+    <group position={position} visible={visible}>
       <Box size={[0.75, 0.45, 0.6]} position={[0, 0.225, 0]} color={COLORS.woodDark} />
       <mesh position={[0, 0.52, 0]} castShadow receiveShadow>
         <boxGeometry args={[0.85, 0.14, 0.7]} />
@@ -322,11 +368,14 @@ function JurorSeat({ position, state }: { position: Vec3; state: SeatState }) {
         <boxGeometry args={[0.85, 0.85, 0.12]} />
         <meshStandardMaterial ref={back} color={COLORS.leather} roughness={0.5} emissiveIntensity={0} />
       </mesh>
+      {/* Occupant sits on the cushion, just in front of the backrest */}
+      <group position={[0, 0.59, -0.05]}>{children}</group>
     </group>
   );
 }
 
 const SEATS_PER_ROW = 3;
+const MAX_SEATS = 6;
 const SEAT_X = [-1.3, 0, 1.3];
 
 export function JuryBox({
@@ -334,11 +383,13 @@ export function JuryBox({
   rotationY,
   seats,
   active,
+  renderOccupant,
 }: {
   position: Vec3;
   rotationY: number;
   seats: SeatState[];
   active: boolean;
+  renderOccupant?: (index: number) => ReactNode;
 }) {
   return (
     <group position={position} rotation-y={rotationY}>
@@ -355,10 +406,16 @@ export function JuryBox({
         </group>
       ))}
       <Box size={[4.4, 2.2, 0.12]} position={[0, 1.1, -1.6]} color={COLORS.woodMid} />
-      {seats.map((state, i) => {
+      {/* Every seat stays mounted and unused ones are hidden, so the jurors'
+          name tags (drei <Html>) never unmount mid-render. */}
+      {Array.from({ length: MAX_SEATS }, (_, i) => {
         const row = Math.floor(i / SEATS_PER_ROW);
         const seatPosition: Vec3 = row === 0 ? [SEAT_X[i % SEATS_PER_ROW], 0.2, 0.45] : [SEAT_X[i % SEATS_PER_ROW], 0.6, -0.8];
-        return <JurorSeat key={i} position={seatPosition} state={state} />;
+        return (
+          <JurorSeat key={i} position={seatPosition} state={seats[i] ?? "pending"} visible={i < seats.length}>
+            {renderOccupant?.(i)}
+          </JurorSeat>
+        );
       })}
     </group>
   );

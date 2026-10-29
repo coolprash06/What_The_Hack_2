@@ -24,26 +24,41 @@ Example cases:
 1. A friend leaked the group chats to impress a girl. She blocked him, and now the whole college knows what's in the chats. The petitioners want an adequate punishment.
 2. A friend shared the team's hackathon project ideas to impress a girl, and her team built a better project with them. What should his punishment be?
 
-## User Flow
-0. **Lamp pull:** The courtroom starts dark. The user pulls a banker's lamp chain to light the room and open court ("Court is now in session"). Nothing else is interactive until then.
+## Opening Sequence
+1. **Dark wide shot:** on page load, the camera shows the entire courtroom (judge's bench, both podiums, jury box, witness stand, all characters). The room is almost dark: only faint silhouettes, plus the lamp's dark-state sheen. A small hint near the lamp says "Pull the lamp to open court." Nothing else is clickable.
+2. **Lamp pull:** a banker's lamp with a pull chain sits on the judge's bench. Pulling it lights the bulb first, then the whole room ramps up to full brightness, so every character and area is clearly visible.
+3. **Start button:** 3 seconds after the room is lit, a small "Start the proceedings" button fades in.
+4. **Judge's opening line:** on click, the camera zooms in on the AI Judge, and a speech bubble types out: "Good morning all, let us begin the proceedings."
+5. The case flow then begins.
+
+## Case Flow
 1. **File the case:** case title, petitioner name, defendant name, petitioner's statement, punishment requested, number of jurors (1–6).
 2. **Defendant's statement:** the defendant's side.
 3. **Witnesses (optional):** skip, or add one or more witnesses. Each has a name, the side they support (Petitioner / Defendant / Neutral), their relationship to the parties, and a statement.
 4. **Jury:** one card per juror with name, vote (Guilty / Not Guilty), and reason.
 5. **Deliberation:** a dramatic loading state while the AI Judge decides.
-6. **Verdict:** a formal verdict card, then "Start new case".
+6. **Verdict:** a formal verdict card, then "Start new case". If the AI call fails, a "Mistrial" card with an "Appeal to the Judge again" (retry) button.
+
+The camera focuses on the active part of the court in each step.
+
+### Navigation
+- A small fixed **Back / Next** control in the bottom-right corner moves through the flow.
+- "Next" is disabled until the current step's required fields are filled.
+- On the jury step, "Next" moves to the next juror, then to deliberation after the last one.
+- A step progress bar at the top.
 
 ## AI Judge
 - Reads all statements, witness testimony, and jury votes and reasons.
 - Applies the **Friendship Constitution**, cites articles by number, and can creatively apply them to new situations.
 - Treats witnesses with suspicion: considers their side, their relationship to the parties, and possible bias or lying.
 - Tone: dramatic and theatrical, treating petty disputes like the trial of the century. Funny, never hateful or crude.
+- Personality lives in `lib/judge.ts`.
 
 ### Verdict Output (structured JSON)
 - `summary`: both sides summarised
-- `juryTally`
+- `juryTally` (recomputed on the server from the real votes)
 - `verdict`
-- `articlesViolated`
+- `articlesViolated` (only article numbers that exist in the constitution)
 - `witnessAssessments`: credibility rating out of 10 plus a judge comment, per witness (omitted if there are no witnesses)
 - `punishment`
 - `closingRemark`
@@ -54,15 +69,24 @@ Articles have a number, title, rule, and punishment. Stored in `lib/constitution
 - **More articles: to be designed later.** The demo cases need articles covering leaked group chats and leaked project ideas.
 
 ## 3D Courtroom
+### Current (keep this layout for now)
 - Built only from primitive shapes (no external models or textures).
-- **Visual reference:** supreme-court style. A long raised wooden bench with a row of high-back chairs, deep maroon/purple velvet drapes behind it, and wood-paneled walls.
-- **AI Judge** in the tall center chair, with a glowing element so it reads as "AI".
-- **Jurors** seated at the bench on either side of the judge. The seat count matches the juror count.
-- Petitioner and defendant counsel tables facing the bench, each with a monitor shape, plus a central lectern with a mic.
-- Witness stand near the bench.
-- **Banker's lamp with a pull chain** on the judge's section of the bench, ported from the File Cabinet portfolio (`lamp.txt`).
-- Simple low-poly characters with name labels, an active-speaker highlight, and idle animation.
-- The camera moves to focus on the active part of the court in each step.
+- Judge's bench at the back center with a gavel, books and a scales emblem; petitioner podium on the left; defendant podium on the right; jury box with one seat per juror; wall lamps.
+- **To add:** a witness stand near the judge's bench, and the lamp on the judge's bench.
+
+### Characters
+- Simple stylized low-poly figures built from primitives, each a distinct color: AI Judge (dark robe, glowing visor or eyes so it reads as "AI"), petitioner, defendant, jurors (one per juror), and a witness.
+- Floating name labels ("Petitioner", "Defendant", "Juror 1"... until names are entered).
+- Subtle idle animation; the active speaker gets a soft highlight.
+
+### Lamp
+- A banker's lamp with a pull chain, ported from the File Cabinet portfolio (`lamp.txt`).
+- Must keep the fixes listed in `lamp.txt`'s "KNOWN QUIRKS" section.
+
+### Possible Later Restyle (not now)
+A supreme-court style look: a long raised bench with a row of high-back chairs (jurors seated beside the judge), deep maroon drapes, and wood-paneled walls. Only to be considered after the full flow works.
+
+### Rules
 - **No flags or national symbols.**
 
 ## Features
@@ -71,9 +95,10 @@ Articles have a number, title, rule, and punishment. Stored in `lib/constitution
 ## Tech Stack
 - Next.js (App Router, TypeScript) + Tailwind
 - React Three Fiber + drei (3D), zustand (lamp/court state)
-- Groq API (Llama), called only from the server route `app/api/verdict/route.ts`
+- Groq API (Llama, default `llama-3.3-70b-versatile`), called only from the server route `app/api/verdict/route.ts`
 - Deployed on Vercel
 - `GROQ_API_KEY` and `GROQ_MODEL` in environment variables; `.env.local` is never committed
+- The Groq key will be added later; until then the verdict step shows the Mistrial card
 
 ## Out of Scope
 - Real-time multiplayer or jurors voting from their own phones
@@ -85,9 +110,14 @@ Articles have a number, title, rule, and punishment. Stored in `lib/constitution
 - Friendship Constitution articles
 - Judge persona(s)
 - Objection button behaviour
+- Whether to do the supreme-court restyle
 
-## Build Plan
-- **Prompt 1:** app scaffold, step flow, Groq verdict API
-- **Prompt 2:** courtroom restyle, characters, witness step
-- **Prompt 3:** supreme-court layout, lamp-pull start sequence
-- Then: constitution, polish, README, deploy, submit by 5:30 PM
+## Status
+**Done:** app scaffold, step flow (file case, defence, jury, deliberation, verdict), verdict API with validation and Mistrial handling, basic 3D room with camera moves.
+
+**Next:**
+1. Witness stand, characters, lamp, opening sequence, Back/Next navigation
+2. Witness form step and witness credibility in the verdict
+3. Add the Groq key and test real verdicts (by ~4:30 PM)
+4. Friendship Constitution, polish
+5. README, deploy to Vercel, make the repo public, submit by 5:30 PM
